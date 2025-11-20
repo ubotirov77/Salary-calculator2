@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>근무 캘린더 · 존 (폐기물 창고)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-main: #020617;
+      --bg-card: #020617;
+      --bg-body: radial-gradient(circle at top, #1f2937, #020617 60%);
+      --border-soft: #1f2937;
+      --border-strong: rgba(148, 163, 184, 0.45);
+      --text-main: #e5e7eb;
+      --text-sub: #9ca3af;
+      --accent-11-border: rgba(59, 130, 246, 0.9);
+      --accent-11-bg: rgba(37, 99, 235, 0.4);
+      --accent-9-border: rgba(250, 204, 21, 0.9);
+      --accent-9-bg: rgba(234, 179, 8, 0.45);
+      --accent-custom-border: rgba(34, 197, 94, 0.9);
+      --accent-custom-bg: rgba(34, 197, 94, 0.25);
+      --pay-color: #22c55e;
+    }
+
+    body.light {
+      color-scheme: light;
+      --bg-main: #f9fafb;
+      --bg-card: #ffffff;
+      --bg-body: radial-gradient(circle at top, #e5e7eb, #f9fafb 60%);
+      --border-soft: #e5e7eb;
+      --border-strong: #d1d5db;
+      --text-main: #111827;
+      --text-sub: #6b7280;
+      --accent-11-border: #2563eb;
+      --accent-11-bg: rgba(37, 99, 235, 0.1);
+      --accent-9-border: #eab308;
+      --accent-9-bg: rgba(234, 179, 8, 0.1);
+      --accent-custom-border: #22c55e;
+      --accent-custom-bg: rgba(34, 197, 94, 0.12);
+      --pay-color: #16a34a;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-body);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      background: var(--bg-card);
+      border-radius: 18px;
+      padding: 18px 18px 22px;
+      box-shadow: 0 22px 45px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-strong);
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      margin: 0 0 4px;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+    }
+
+    .top-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .top-left label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    input[type="month"],
+    input[type="number"],
+    input[type="time"],
+    input[type="text"],
+    textarea {
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: Menlo, Consolas, monospace;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    body.light input[type="month"],
+    body.light input[type="number"],
+    body.light input[type="time"],
+    body.light input[type="text"],
+    body.light textarea {
+      border-color: #d1d5db;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px #38bdf8;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 6px 10px;
+      border: 1px solid #4b5563;
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    body.light .btn {
+      border-color: #d1d5db;
+    }
+
+    .btn:hover {
+      background: #11182733;
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.4);
+    }
+
+    .btn-primary {
+      border-color: #22c55e;
+      background: #16a34a;
+      color: #f9fafb;
+    }
+
+    .btn-primary:hover {
+      background: #15803d;
+    }
+
+    .btn-danger {
+      border-color: #ef4444;
+      background: #b91c1c;
+      color: #fee2e2;
+    }
+
+    .btn-danger:hover {
+      background: #991b1b;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+
+    .calendar {
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-main);
+      padding: 10px;
+    }
+
+    .weekday-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 4px;
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      text-align: center;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .day-cell {
+      position: relative;
+      border-radius: 10px;
+      padding: 6px 4px;
+      min-height: 52px;
+      border: 1px solid #111827;
+      background: var(--bg-main);
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.07s ease, box-shadow 0.07s ease, border-color 0.1s;
+      text-align: left;
+    }
+
+    body.light .day-cell {
+      border-color: #e5e7eb;
+    }
+
+    .day-cell.empty {
+      visibility: hidden;
+      cursor: default;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .day-number {
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .day-shift-label {
+      font-size: 0.72rem;
+      margin-top: 2px;
+    }
+
+    .day-pay {
+      font-size: 0.7rem;
+      color: #a5b4fc;
+      margin-top: 2px;
+    }
+
+    .day-cell.shift-11 {
+      border-color: var(--accent-11-border);
+      background: radial-gradient(circle at top, var(--accent-11-bg), var(--bg-main));
+      box-shadow: 0 0 0 1px var(--accent-11-border);
+    }
+
+    .day-cell.shift-9 {
+      border-color: var(--accent-9-border);
+      background: radial-gradient(circle at top, var(--accent-9-bg), var(--bg-main));
+      box-shadow: 0 0 0 1px var(--accent-9-border);
+    }
+
+    .day-cell.shift-custom {
+      border-color: var(--accent-custom-border);
+      background: radial-gradient(circle at top, var(--accent-custom-bg), var(--bg-main));
+      box-shadow: 0 0 0 1px var(--accent-custom-border);
+    }
+
+    .day-cell:active {
+      transform: scale(0.97);
+      box-shadow: none;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: var(--text-sub);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-color-11,
+    .legend-color-9,
+    .legend-color-custom {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+    }
+
+    .legend-color-11 {
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.6), rgba(15, 23, 42, 1));
+      border: 1px solid var(--accent-11-border);
+    }
+
+    .legend-color-9 {
+      background: radial-gradient(circle, rgba(234, 179, 8, 0.7), rgba(15, 23, 42, 1));
+      border: 1px solid var(--accent-9-border);
+    }
+
+    .legend-color-custom {
+      background: radial-gradient(circle, rgba(34, 197, 94, 0.7), rgba(15, 23, 42, 1));
+      border: 1px solid var(--accent-custom-border);
+    }
+
+    .summary-card {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+    }
+
+    .summary-item {
+      border-radius: 12px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-main);
+    }
+
+    .summary-label {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      margin-bottom: 1px;
+    }
+
+    .summary-value {
+      font-size: 0.98rem;
+      font-weight: 600;
+    }
+
+    .summary-value.highlight {
+      color: var(--pay-color);
+    }
+
+    .footer-text {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      margin-top: 8px;
+    }
+
+    .settings-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+      align-items: flex-end;
+    }
+
+    .settings-row > div {
+      flex: 1 1 120px;
+      min-width: 0;
+    }
+
+    .settings-label {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 360px;
+      background: var(--bg-card);
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .modal-date {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .modal-close {
+      border: none;
+      background: transparent;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .modal-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .modal-row > div {
+      flex: 1;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .quick-buttons {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .quick-btn {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
+
+    @media (max-width: 600px) {
+      .day-cell {
+        min-height: 50px;
+        padding: 5px 3px;
+      }
+      .container {
+        padding: 14px;
+        border-radius: 14px;
+      }
+      .modal {
+        max-width: 90%;
+      }
+    }
+
+    .export-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .export-row .left {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>근무 캘린더 · 존</h1>
+    <div class="subtitle">폐기물 창고 · 하루별 시작/끝 시간 + 맞춤 급여 설정</div>
+
+    <div class="top-row">
+      <div class="top-left">
+        <label for="monthPicker">월 선택</label>
+        <input type="month" id="monthPicker">
+      </div>
+      <div class="top-right" style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button type="button" class="btn" id="themeToggle">🌙 다크</button>
+        <button type="button" class="btn" id="printBtn">🧾 PDF/인쇄</button>
+        <button type="button" class="btn" id="clearMonthBtn">이 월 초기화</button>
+        <button type="button" class="btn" id="clearAllBtn">전체 삭제</button>
+      </div>
+    </div>
+
+    <div class="section-title">급여 설정 (기본값)</div>
+    <div class="hint">여기 금액은 기본값. 각 날짜에서는 따로 수정 가능 (공휴일, 특근 등).</div>
+    <div class="settings-row">
+      <div>
+        <label class="settings-label" for="pay11Input">11시간 기본 일급 (원, 보통 21–08)</label>
+        <input type="number" id="pay11Input" min="0" step="1000" placeholder="예: 155000">
+      </div>
+      <div>
+        <label class="settings-label" for="pay9Input">9시간 기본 일급 (원, 보통 21–06)</label>
+        <input type="number" id="pay9Input" min="0" step="1000" placeholder="예: 130000">
+      </div>
+      <div>
+        <label class="settings-label" for="hourlyInput">시간당 기본 시급 (선택)</label>
+        <input type="number" id="hourlyInput" min="0" step="500" placeholder="예: 15000">
+      </div>
+      <div style="flex:0 0 auto;">
+        <button type="button" class="btn btn-primary" id="savePayBtn">적용</button>
+      </div>
+    </div>
+
+    <div class="section-title">캘린더</div>
+    <div class="hint">하루를 클릭하면 팝업이 뜸. 21–08 / 21–06 퀵 버튼 + 직접 시간/급여 입력.</div>
+
+    <div class="calendar">
+      <div class="weekday-row">
+        <div>일</div>
+        <div>월</div>
+        <div>화</div>
+        <div>수</div>
+        <div>목</div>
+        <div>금</div>
+        <div>토</div>
+      </div>
+      <div class="days-grid" id="daysGrid"></div>
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-color-11"></span> 11시간 (21:00 → 08:00, 타입: 11)
+        </div>
+        <div class="legend-item">
+          <span class="legend-color-9"></span> 9시간 (21:00 → 06:00, 타입: 9)
+        </div>
+        <div class="legend-item">
+          <span class="legend-color-custom"></span> 커스텀 시간/급여 (타입: 기타/공휴일 등)
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">요약</div>
+    <div class="summary-card">
+      <div class="summary-item">
+        <div class="summary-label">11시간 근무 (타입 11)</div>
+        <div class="summary-value" id="count11">0회</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">9시간 근무 (타입 9)</div>
+        <div class="summary-value" id="count9">0회</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">커스텀 근무</div>
+        <div class="summary-value" id="countCustom">0회</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">총 근무 시간</div>
+        <div class="summary-value" id="totalHours">0시간</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">예상 급여</div>
+        <div class="summary-value highlight" id="totalPay">0원</div>
+      </div>
+    </div>
+
+    <div class="section-title">텍스트 내보내기 (복사해서 제출용)</div>
+    <div class="export-row">
+      <div class="left">
+        현재 선택된 월 기준, 예시 형식으로 한국어 요일 + 시간 + 근무시간을 생성합니다.
+      </div>
+      <button type="button" class="btn" id="copyExportBtn">📋 복사하기</button>
+    </div>
+    <textarea id="exportText" readonly></textarea>
+
+    <div class="footer-text">
+      데이터는 이 브라우저의 <code>localStorage</code>에 저장됩니다. 같은 기기·브라우저에서는 자동 유지됨.  
+      PDF 저장: 🧾 버튼 → 브라우저 인쇄 → "PDF로 저장".
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">근무 설정</div>
+          <div class="modal-date" id="modalDateText"></div>
+        </div>
+        <button class="modal-close" id="modalCloseBtn">&times;</button>
+      </div>
+
+      <div class="quick-buttons">
+        <button type="button" class="btn quick-btn" id="quick11Btn">11시간 (21–08)</button>
+        <button type="button" class="btn quick-btn" id="quick9Btn">9시간 (21–06)</button>
+      </div>
+
+      <div class="modal-row" style="margin-top:8px;">
+        <div>
+          <label class="settings-label" for="modalStart">시작 시간</label>
+          <input type="time" id="modalStart">
+        </div>
+        <div>
+          <label class="settings-label" for="modalEnd">끝 시간</label>
+          <input type="time" id="modalEnd">
+        </div>
+      </div>
+
+      <div class="modal-row" style="margin-top:6px;">
+        <div>
+          <label class="settings-label">근무 시간 (자동 계산)</label>
+          <input type="text" id="modalHours" readonly>
+        </div>
+        <div>
+          <label class="settings-label" for="modalPay">이 날 급여 (원)</label>
+          <input type="number" id="modalPay" min="0" step="500">
+        </div>
+      </div>
+
+      <div class="modal-row" style="margin-top:6px;">
+        <div>
+          <label class="settings-label" for="modalNote">메모 (선택)</label>
+          <input type="text" id="modalNote" placeholder="예: 공휴일, 특근, 보너스 등">
+        </div>
+      </div>
+
+      <div class="hint" style="margin-top:6px;">
+        끝 시간이 시작보다 빠르면 자동으로 "다음날"로 계산됨 (21:00 → 06:00 = 9시간, 21:00 → 10:00 = 13시간).
+      </div>
+
+      <div class="modal-buttons">
+        <button type="button" class="btn btn-danger" id="modalDeleteBtn">이 날 삭제</button>
+        <div style="display:flex; gap:6px; margin-left:auto;">
+          <button type="button" class="btn" id="modalCancelBtn">취소</button>
+          <button type="button" class="btn btn-primary" id="modalSaveBtn">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "shift-calendar-v3-single";
+
+    let state = {
+      settings: {
+        pay11: 155000,
+        pay9: 130000,
+        hourly: 0
+      },
+      // { date, start, end, hours, pay, type: "11" | "9" | "custom", note }
+      shifts: []
+    };
+
+    let currentModalDate = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return;
+
+        if (!parsed.settings) parsed.settings = {};
+        if (typeof parsed.settings.pay11 !== "number") parsed.settings.pay11 = 155000;
+        if (typeof parsed.settings.pay9 !== "number") parsed.settings.pay9 = 130000;
+        if (typeof parsed.settings.hourly !== "number") parsed.settings.hourly = 0;
+        if (!Array.isArray(parsed.shifts)) parsed.shifts = [];
+
+        state = parsed;
+      } catch (e) {
+        console.error("loadState error", e);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getCurrentMonthStr() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      return `${y}-${m}`;
+    }
+
+    function formatCurrency(num) {
+      return num.toLocaleString("ko-KR") + "원";
+    }
+
+    function filterShiftsByMonth(monthStr) {
+      return state.shifts.filter(item => item.date && item.date.startsWith(monthStr));
+    }
+
+    function getShift(dateStr) {
+      return state.shifts.find(item => item.date === dateStr) || null;
+    }
+
+    function setShift(shift) {
+      state.shifts = state.shifts.filter(item => item.date !== shift.date);
+      state.shifts.push(shift);
+      saveState();
+    }
+
+    function deleteShift(dateStr) {
+      state.shifts = state.shifts.filter(item => item.date !== dateStr);
+      saveState();
+    }
+
+    function computeHours(startStr, endStr) {
+      if (!startStr || !endStr) return 0;
+      const [sh, sm] = startStr.split(":").map(Number);
+      const [eh, em] = endStr.split(":").map(Number);
+      if (isNaN(sh) || isNaN(sm) || isNaN(eh) || isNaN(em)) return 0;
+      let start = sh + sm / 60;
+      let end = eh + em / 60;
+      let diff = end - start;
+      if (diff <= 0) diff += 24;
+      return Math.round(diff * 100) / 100;
+    }
+
+    function weekdayKorean(dateStr) {
+      const d = new Date(dateStr);
+      if (isNaN(d)) return "";
+      const names = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+      return names[d.getDay()];
+    }
+
+    function formatTimeShort(t) {
+      if (!t) return "";
+      const [h, m] = t.split(":");
+      const hh = String(h).padStart(2, "0");
+      if (m === "00" || m === undefined) return hh;
+      return `${hh}:${m}`;
+    }
+
+    function renderCalendar() {
+      const monthPicker = document.getElementById("monthPicker");
+      const monthStr = monthPicker.value || getCurrentMonthStr();
+      const [year, month] = monthStr.split("-").map(Number);
+
+      const daysGrid = document.getElementById("daysGrid");
+      daysGrid.innerHTML = "";
+
+      const firstDay = new Date(year, month - 1, 1);
+      const startWeekday = firstDay.getDay();
+      const lastDay = new Date(year, month, 0).getDate();
+
+      for (let i = 0; i < startWeekday; i++) {
+        const emptyDiv = document.createElement("div");
+        emptyDiv.className = "day-cell empty";
+        daysGrid.appendChild(emptyDiv);
+      }
+
+      for (let d = 1; d <= lastDay; d++) {
+        const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const shift = getShift(dateStr);
+
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "day-cell";
+        cell.dataset.date = dateStr;
+
+        if (shift) {
+          if (shift.type === "11") cell.classList.add("shift-11");
+          else if (shift.type === "9") cell.classList.add("shift-9");
+          else cell.classList.add("shift-custom");
+        }
+
+        const dayNumber = document.createElement("div");
+        dayNumber.className = "day-number";
+        dayNumber.textContent = d;
+
+        const label = document.createElement("div");
+        label.className = "day-shift-label";
+
+        const payDiv = document.createElement("div");
+        payDiv.className = "day-pay";
+
+        if (shift) {
+          const start = shift.start || "";
+          const end = shift.end || "";
+          const hours = shift.hours || 0;
+          label.textContent = `${start} → ${end} · ${hours}h`;
+          payDiv.textContent = formatCurrency(shift.pay || 0);
+        } else {
+          label.textContent = "";
+          payDiv.textContent = "";
+        }
+
+        cell.appendChild(dayNumber);
+        cell.appendChild(label);
+        cell.appendChild(payDiv);
+
+        cell.addEventListener("click", () => {
+          openModal(dateStr);
+        });
+
+        daysGrid.appendChild(cell);
+      }
+
+      updateSummary();
+      updateExportText();
+    }
+
+    function updateSummary() {
+      const monthPicker = document.getElementById("monthPicker");
+      const monthStr = monthPicker.value || getCurrentMonthStr();
+
+      const current = filterShiftsByMonth(monthStr);
+      let count11 = 0;
+      let count9 = 0;
+      let countCustom = 0;
+      let totalHours = 0;
+      let totalPay = 0;
+
+      current.forEach(item => {
+        if (item.type === "11") count11++;
+        else if (item.type === "9") count9++;
+        else countCustom++;
+
+        totalHours += item.hours || 0;
+        totalPay += item.pay || 0;
+      });
+
+      document.getElementById("count11").textContent = `${count11}회`;
+      document.getElementById("count9").textContent = `${count9}회`;
+      document.getElementById("countCustom").textContent = `${countCustom}회`;
+      document.getElementById("totalHours").textContent =
+        `${Math.round(totalHours * 100) / 100}시간`;
+      document.getElementById("totalPay").textContent = formatCurrency(totalPay);
+    }
+
+    function updateExportText() {
+      const monthPicker = document.getElementById("monthPicker");
+      const monthStr = monthPicker.value || getCurrentMonthStr();
+      const [yearStr, monthNumStr] = monthStr.split("-");
+      const year = yearStr;
+      const monthNum = parseInt(monthNumStr, 10);
+      const header = `${year}.${String(monthNum).padStart(2, "0")}월  폐기물 창고 운영 일정 이름 : 존`;
+
+      const current = filterShiftsByMonth(monthStr)
+        .slice()
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      let lines = [];
+      lines.push(header, "");
+
+      current.forEach((item) => {
+        const dObj = new Date(item.date);
+        const day = dObj.getDate();
+        const weekday = weekdayKorean(item.date);
+
+        const startShort = formatTimeShort(item.start || "");
+        const endShort = formatTimeShort(item.end || "");
+        const hours = item.hours || 0;
+        const hoursText = Number.isInteger(hours) ? String(hours) : String(hours);
+
+        // 예: "2. 화요일. 21-08=11"
+        const line = `${day}. ${weekday}. ${startShort}-${endShort}=${hoursText}`;
+        lines.push(line);
+      });
+
+      document.getElementById("exportText").value = lines.join("\n");
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem("shift-theme");
+      if (saved === "light") {
+        document.body.classList.add("light");
+      }
+      updateThemeButton();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light");
+      const mode = document.body.classList.contains("light") ? "light" : "dark";
+      localStorage.setItem("shift-theme", mode);
+      updateThemeButton();
+    }
+
+    function updateThemeButton() {
+      const btn = document.getElementById("themeToggle");
+      const light = document.body.classList.contains("light");
+      btn.textContent = light ? "🌚 다크 모드" : "🌞 라이트 모드";
+    }
+
+    function initPayInputs() {
+      document.getElementById("pay11Input").value = state.settings.pay11;
+      document.getElementById("pay9Input").value = state.settings.pay9;
+      document.getElementById("hourlyInput").value = state.settings.hourly || "";
+    }
+
+    function applyPaySettings() {
+      const pay11 = Number(document.getElementById("pay11Input").value) || 0;
+      const pay9 = Number(document.getElementById("pay9Input").value) || 0;
+      const hourly = Number(document.getElementById("hourlyInput").value) || 0;
+
+      if (pay11 < 0 || pay9 < 0 || hourly < 0) {
+        alert("금액은 0 이상으로 입력해라.");
+        return;
+      }
+
+      state.settings.pay11 = pay11 || 0;
+      state.settings.pay9 = pay9 || 0;
+      state.settings.hourly = hourly || 0;
+      saveState();
+      renderCalendar();
+    }
+
+    function openModal(dateStr) {
+      currentModalDate = dateStr;
+      const modalBackdrop = document.getElementById("modalBackdrop");
+      const modalDateText = document.getElementById("modalDateText");
+      const modalStart = document.getElementById("modalStart");
+      const modalEnd = document.getElementById("modalEnd");
+      const modalHours = document.getElementById("modalHours");
+      const modalPay = document.getElementById("modalPay");
+      const modalNote = document.getElementById("modalNote");
+
+      modalDateText.textContent = dateStr;
+
+      const shift = getShift(dateStr);
+
+      if (shift) {
+        modalStart.value = shift.start || "";
+        modalEnd.value = shift.end || "";
+        modalHours.value = shift.hours ? `${shift.hours} 시간` : "";
+        modalPay.value = shift.pay || "";
+        modalNote.value = shift.note || "";
+      } else {
+        modalStart.value = "21:00";
+        modalEnd.value = "08:00";
+        const hours = computeHours("21:00", "08:00");
+        modalHours.value = `${hours} 시간`;
+        if (state.settings.pay11 > 0) {
+          modalPay.value = state.settings.pay11;
+        } else if (state.settings.hourly > 0) {
+          modalPay.value = Math.round(hours * state.settings.hourly);
+        } else {
+          modalPay.value = "";
+        }
+        modalNote.value = "";
+      }
+
+      modalBackdrop.style.display = "flex";
+    }
+
+    function closeModal() {
+      currentModalDate = null;
+      document.getElementById("modalBackdrop").style.display = "none";
+    }
+
+    function recalcModalHoursAndMaybePay() {
+      const modalStart = document.getElementById("modalStart").value;
+      const modalEnd = document.getElementById("modalEnd").value;
+      const modalHours = document.getElementById("modalHours");
+      const modalPayInput = document.getElementById("modalPay");
+
+      const hours = computeHours(modalStart, modalEnd);
+      if (!hours) {
+        modalHours.value = "";
+        return;
+      }
+      modalHours.value = `${hours} 시간`;
+
+      if (state.settings.hourly > 0 && !modalPayInput.value) {
+        const pay = Math.round(hours * state.settings.hourly);
+        modalPayInput.value = pay;
+      }
+    }
+
+    async function copyExportText() {
+      const textarea = document.getElementById("exportText");
+      const text = textarea.value || "";
+      if (!text.trim()) return;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          alert("복사 완료.");
+        } else {
+          textarea.select();
+          document.execCommand("copy");
+          alert("복사 완료.");
+        }
+      } catch (e) {
+        alert("복사 중 오류. 직접 드래그해서 복사해라.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      initTheme();
+
+      const monthPicker = document.getElementById("monthPicker");
+      const defaultMonth = getCurrentMonthStr();
+      monthPicker.value = defaultMonth;
+
+      document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+      document.getElementById("clearMonthBtn").addEventListener("click", () => {
+        const monthStr = monthPicker.value || getCurrentMonthStr();
+        state.shifts = state.shifts.filter(item => !item.date || !item.date.startsWith(monthStr));
+        saveState();
+        renderCalendar();
+      });
+
+      document.getElementById("clearAllBtn").addEventListener("click", () => {
+        if (!confirm("진짜 전체 데이터를 삭제할까? 되돌릴 수 없다.")) return;
+        state.shifts = [];
+        saveState();
+        renderCalendar();
+      });
+
+      monthPicker.addEventListener("change", () => {
+        renderCalendar();
+      });
+
+      document.getElementById("savePayBtn").addEventListener("click", applyPaySettings);
+      document.getElementById("copyExportBtn").addEventListener("click", copyExportText);
+
+      const modalBackdrop = document.getElementById("modalBackdrop");
+      document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+      document.getElementById("modalCancelBtn").addEventListener("click", closeModal);
+      modalBackdrop.addEventListener("click", (e) => {
+        if (e.target === modalBackdrop) closeModal();
+      });
+
+      document.getElementById("modalStart").addEventListener("change", recalcModalHoursAndMaybePay);
+      document.getElementById("modalEnd").addEventListener("change", recalcModalHoursAndMaybePay);
+
+      document.getElementById("quick11Btn").addEventListener("click", () => {
+        document.getElementById("modalStart").value = "21:00";
+        document.getElementById("modalEnd").value = "08:00";
+        const hours = computeHours("21:00", "08:00");
+        document.getElementById("modalHours").value = `${hours} 시간`;
+        if (state.settings.pay11 > 0) {
+          document.getElementById("modalPay").value = state.settings.pay11;
+        } else if (state.settings.hourly > 0) {
+          document.getElementById("modalPay").value = Math.round(hours * state.settings.hourly);
+        }
+      });
+
+      document.getElementById("quick9Btn").addEventListener("click", () => {
+        document.getElementById("modalStart").value = "21:00";
+        document.getElementById("modalEnd").value = "06:00";
+        const hours = computeHours("21:00", "06:00");
+        document.getElementById("modalHours").value = `${hours} 시간`;
+        if (state.settings.pay9 > 0) {
+          document.getElementById("modalPay").value = state.settings.pay9;
+        } else if (state.settings.hourly > 0) {
+          document.getElementById("modalPay").value = Math.round(hours * state.settings.hourly);
+        }
+      });
+
+      document.getElementById("modalSaveBtn").addEventListener("click", () => {
+        if (!currentModalDate) return;
+        const start = document.getElementById("modalStart").value;
+        const end = document.getElementById("modalEnd").value;
+        const pay = Number(document.getElementById("modalPay").value) || 0;
+        const note = document.getElementById("modalNote").value.trim();
+
+        const hours = computeHours(start, end);
+        if (!start || !end || !hours) {
+          alert("시작/끝 시간을 제대로 입력해라.");
+          return;
+        }
+
+        let type = "custom";
+        const hRounded = Math.round(hours * 100) / 100;
+        if (hRounded === 11 && start === "21:00" && end === "08:00") type = "11";
+        else if (hRounded === 9 && start === "21:00" && end === "06:00") type = "9";
+
+        const shift = {
+          date: currentModalDate,
+          start,
+          end,
+          hours: hRounded,
+          pay,
+          type,
+          note
+        };
+
+        setShift(shift);
+        closeModal();
+        renderCalendar();
+      });
+
+      document.getElementById("modalDeleteBtn").addEventListener("click", () => {
+        if (!currentModalDate) return;
+        deleteShift(currentModalDate);
+        closeModal();
+        renderCalendar();
+      });
+
+      initPayInputs();
+      renderCalendar();
+    });
+  </script>
+</body>
+</html>
